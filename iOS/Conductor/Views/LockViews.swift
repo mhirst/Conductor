@@ -22,7 +22,14 @@ struct LockPanel: View {
 
     var body: some View {
         VStack(spacing: 6) {
-            header.padding(.horizontal, 8)
+            Group {
+                if Layout.isPhone {
+                    ScrollView(.horizontal, showsIndicators: false) { header }
+                } else {
+                    header
+                }
+            }
+            .padding(.horizontal, 8)
             HStack(spacing: 3) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(param?.name ?? "—").font(.system(size: 11, weight: .semibold)).lineLimit(1)
@@ -30,13 +37,13 @@ struct LockPanel: View {
                         .font(.system(size: 10).monospacedDigit()).foregroundStyle(.secondary).lineLimit(1)
                 }
                 .padding(.horizontal, 6)
-                .frame(width: 92, alignment: .leading)
+                .frame(width: Layout.rowLabelWidth, alignment: .leading)
                 .frame(maxHeight: .infinity)
                 .background(RoundedRectangle(cornerRadius: 4).fill(Theme.panel))
 
                 laneCells
             }
-            .frame(height: 120)
+            .frame(height: Layout.isPhone ? 96 : 120)
         }
         // No horizontal padding so the lane's columns line up with the step grid above.
         .padding(.vertical, 8)

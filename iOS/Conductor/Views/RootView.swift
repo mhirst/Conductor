@@ -1,7 +1,32 @@
 import SwiftUI
 
 enum Screen: String, CaseIterable {
-    case session = "Session", mixer = "Mixer", devices = "Devices", play = "Play", sequencer = "Steps"
+    case session = "Session", mixer = "Mixer", devices = "Devices", play = "Play", sequencer = "Steps", browse = "Browse"
+
+    /// iPhone tabs: five fit without iOS folding the rest into "More"; Browse opens as a sheet instead.
+    static var phoneTabs: [Screen] { allCases.filter { $0 != .browse } }
+
+    var icon: String {
+        switch self {
+        case .session: "square.grid.3x3.fill"
+        case .mixer: "slider.vertical.3"
+        case .devices: "dial.medium.fill"
+        case .play: "circle.grid.3x3.fill"
+        case .sequencer: "square.grid.4x3.fill"
+        case .browse: "books.vertical.fill"
+        }
+    }
+
+    @ViewBuilder var view: some View {
+        switch self {
+        case .session: SessionView()
+        case .mixer: MixerView()
+        case .devices: DevicesView()
+        case .play: PlayView()
+        case .sequencer: SequencerView()
+        case .browse: BrowserView()
+        }
+    }
 }
 
 struct RootView: View {
@@ -10,19 +35,13 @@ struct RootView: View {
 
     var body: some View {
         Group {
-            if store.hasState {
+            if store.hasState, Layout.isPhone {
+                PhoneRootView(screen: $screen)
+            } else if store.hasState {
                 VStack(spacing: 0) {
                     TransportBar(screen: $screen)
-                    Group {
-                        switch screen {
-                        case .session: SessionView()
-                        case .mixer: MixerView()
-                        case .devices: DevicesView()
-                        case .play: PlayView()
-                        case .sequencer: SequencerView()
-                        }
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    screen.view
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
                 .overlay(alignment: .top) {
                     if case .failed = store.status {
@@ -41,20 +60,53 @@ struct RootView: View {
     }
 }
 
+/// iPhone: native tab bar for the five screens, slim transport bar on top of each.
+struct PhoneRootView: View {
+    @Environment(LiveStore.self) private var store
+    @Binding var screen: Screen
+
+    var body: some View {
+        TabView(selection: $screen) {
+            ForEach(Screen.phoneTabs, id: \.self) { s in
+                Tab(s.rawValue, systemImage: s.icon, value: s) {
+                    VStack(spacing: 0) {
+                        TransportBar(screen: $screen, showsPicker: false)
+                        s.view.frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
+                    .background(Theme.background.ignoresSafeArea())
+                }
+            }
+        }
+        .overlay(alignment: .top) {
+            if case .failed = store.status {
+                Label("Reconnecting to Live…", systemImage: "wifi.exclamationmark")
+                    .font(.caption.weight(.semibold))
+                    .padding(.horizontal, 12).padding(.vertical, 6)
+                    .background(Capsule().fill(Theme.record.opacity(0.9)))
+                    .padding(.top, 50)
+            }
+        }
+        .onAppear { if screen == .browse { screen = .play } }
+    }
+}
+
 struct TransportBar: View {
     @Environment(LiveStore.self) private var store
     @Binding var screen: Screen
+    var showsPicker = true
     @State private var tempoStart: Double?
 
     var body: some View {
-        HStack(spacing: 8) {
-            Picker("Screen", selection: $screen) {
-                ForEach(Screen.allCases, id: \.self) { Text($0.rawValue) }
-            }
-            .pickerStyle(.segmented)
-            .frame(maxWidth: 400)
+        HStack(spacing: Layout.isPhone ? 6 : 8) {
+            if showsPicker {
+                Picker("Screen", selection: $screen) {
+                    ForEach(Screen.allCases, id: \.self) { Text($0.rawValue) }
+                }
+                .pickerStyle(.segmented)
+                .frame(maxWidth: 480)
 
-            Spacer(minLength: 4)
+                Spacer(minLength: 4)
+            }
 
             transportButton("play.fill", on: store.song.isPlaying, color: Theme.play) { store.play() }
             transportButton("stop.fill", on: false, color: .white) { store.stop() }
@@ -66,7 +118,7 @@ struct TransportBar: View {
                     .font(.system(size: 15, weight: .bold).monospacedDigit())
                 Text("BPM").font(.system(size: 8, weight: .semibold)).foregroundStyle(.secondary)
             }
-            .frame(width: 70, height: 36)
+            .frame(width: Layout.isPhone ? 64 : 70, height: 36)
             .background(RoundedRectangle(cornerRadius: 6).fill(Theme.cell))
             .contentShape(Rectangle())
             .gesture(
@@ -82,10 +134,12 @@ struct TransportBar: View {
 
             Text(beatString)
                 .font(.system(size: 13, weight: .semibold).monospacedDigit())
-                .frame(width: 60, height: 36)
+                .frame(width: Layout.isPhone ? 50 : 60, height: 36)
                 .background(RoundedRectangle(cornerRadius: 6).fill(Theme.cell))
 
             transportButton("metronome", on: store.song.metronome, color: Theme.accent) { store.toggleMetronome() }
+
+            if !showsPicker { Spacer(minLength: 0) }
 
             Menu {
                 Button("Undo", systemImage: "arrow.uturn.backward") { store.undo() }.disabled(!store.song.canUndo)
@@ -117,7 +171,7 @@ struct TransportBar: View {
             Image(systemName: icon)
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundStyle(on ? Color.black : color.opacity(0.9))
-                .frame(width: 44, height: 36)
+                .frame(width: Layout.isPhone ? 40 : 44, height: 36)
                 .background(RoundedRectangle(cornerRadius: 6).fill(on ? color : Theme.cell))
         }
         .buttonStyle(.plain)

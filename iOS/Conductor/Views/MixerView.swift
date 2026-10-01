@@ -24,8 +24,12 @@ struct MixerView: View {
 
 struct ChannelStrip: View {
     @Environment(LiveStore.self) private var store
+    @Environment(\.verticalSizeClass) private var vSize
     @AppStorage("screen") private var screen: Screen = .session
     let track: TrackInfo
+
+    /// iPhone in landscape: no room for the rack and sends, so the fader gets the height.
+    private var phoneLandscape: Bool { Layout.isPhone && vSize == .compact }
 
     var body: some View {
         let color = Color(live: track.color)
@@ -38,9 +42,9 @@ struct ChannelStrip: View {
                 .background(RoundedRectangle(cornerRadius: 4).fill(color))
                 .onTapGesture { store.selectTrack(track.i) }
 
-            effectsRack
+            if !phoneLandscape { effectsRack }
 
-            if !track.sends.isEmpty {
+            if !track.sends.isEmpty, !phoneLandscape {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 28), spacing: 2)], spacing: 4) {
                     ForEach(Array(track.sends.enumerated()), id: \.offset) { idx, value in
                         VStack(spacing: 1) {
@@ -55,7 +59,7 @@ struct ChannelStrip: View {
             }
 
             VStack(spacing: 1) {
-                Knob(value: (track.pan + 1) / 2, color: color, bipolar: true, size: 38, defaultValue: 0.5,
+                Knob(value: (track.pan + 1) / 2, color: color, bipolar: true, size: phoneLandscape ? 30 : 38, defaultValue: 0.5,
                      onBegin: { store.beginTouch("pan:\(track.i)") },
                      onChange: { store.setPan(track.i, $0 * 2 - 1) },
                      onEnd: { store.endTouch("pan:\(track.i)") })
@@ -77,20 +81,28 @@ struct ChannelStrip: View {
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
 
-            if track.kind != .master {
-                ToggleChip(label: track.kind == .return ? sendLetter(track.i - store.regularTracks.count) : "\(track.i + 1)",
-                           isOn: !track.mute, onColor: Theme.activator) { store.toggleMute(track.i) }
-                ToggleChip(label: "S", isOn: track.solo, onColor: Theme.solo) { store.toggleSolo(track.i) }
-            }
-            if track.canArm {
-                ToggleChip(label: "", systemImage: "record.circle", isOn: track.arm, onColor: Theme.record) {
-                    store.toggleArm(track.i)
-                }
-            }
+            buttons
         }
         .padding(5)
-        .frame(width: 88)
+        .frame(width: Layout.isPhone ? 76 : 88)
         .background(RoundedRectangle(cornerRadius: 6).fill(Theme.panel))
+    }
+
+    @ViewBuilder private var buttons: some View {
+        let activator = ToggleChip(label: track.kind == .return ? sendLetter(track.i - store.regularTracks.count) : "\(track.i + 1)",
+                                   isOn: !track.mute, onColor: Theme.activator) { store.toggleMute(track.i) }
+        let solo = ToggleChip(label: "S", isOn: track.solo, onColor: Theme.solo) { store.toggleSolo(track.i) }
+        let arm = ToggleChip(label: "", systemImage: "record.circle", isOn: track.arm, onColor: Theme.record) {
+            store.toggleArm(track.i)
+        }
+        if phoneLandscape {
+            // Side by side to save height.
+            if track.kind != .master { HStack(spacing: 3) { activator; solo } }
+            if track.canArm { arm }
+        } else {
+            if track.kind != .master { activator; solo }
+            if track.canArm { arm }
+        }
     }
 
     /// The track's devices, each with an on/off toggle. Tap a name to edit it in Devices.
@@ -125,7 +137,7 @@ struct ChannelStrip: View {
                 }
             }
         }
-        .frame(height: 88)
+        .frame(height: Layout.isPhone ? 66 : 88)
         .padding(3)
         .background(RoundedRectangle(cornerRadius: 4).fill(Color.black.opacity(0.25)))
     }

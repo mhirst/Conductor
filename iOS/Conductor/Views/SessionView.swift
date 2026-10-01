@@ -12,10 +12,11 @@ struct SessionView: View {
     @State private var scenePosition = ScrollPosition()
     @State private var gridViewport: CGSize = .zero
 
-    private var cellW: CGFloat { sizeClass == .regular ? 112 : 92 }
-    private var cellH: CGFloat { sizeClass == .regular ? 48 : 40 }
+    // iPhone gets its own tighter grid (a Pro Max in landscape reports a regular size class).
+    private var cellW: CGFloat { Layout.isPhone ? 84 : (sizeClass == .regular ? 112 : 92) }
+    private var cellH: CGFloat { Layout.isPhone ? 46 : (sizeClass == .regular ? 48 : 40) }
     private let gap: CGFloat = 2
-    private var sceneW: CGFloat { sizeClass == .regular ? 120 : 96 }
+    private var sceneW: CGFloat { Layout.isPhone ? 68 : (sizeClass == .regular ? 120 : 96) }
     private let headerH: CGFloat = 34
     private let stopH: CGFloat = 34
 
@@ -104,6 +105,7 @@ struct SessionView: View {
                 .scrollDisabled(true)
                 Button { store.stopAll() } label: {
                     Label("Stop All", systemImage: "stop.fill")
+                        .labelStyle(PhoneTitleOnly())
                         .font(.caption.weight(.bold))
                         .frame(width: sceneW, height: stopH)
                         .background(RoundedRectangle(cornerRadius: 5).fill(Theme.cell))
@@ -296,6 +298,17 @@ struct Blink: ViewModifier {
             } animation: { _ in .easeInOut(duration: 0.18) }
         } else {
             content
+        }
+    }
+}
+
+/// On iPhone, drop a label's icon where width is tight.
+struct PhoneTitleOnly: LabelStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        if Layout.isPhone {
+            configuration.title
+        } else {
+            HStack(spacing: 6) { configuration.icon; configuration.title }
         }
     }
 }

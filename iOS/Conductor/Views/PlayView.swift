@@ -17,6 +17,9 @@ struct PlayView: View {
 
     @State private var held: [Int: Int] = [:]      // cell -> note sounding
     @State private var showMIDIHelp = false
+    @State private var showSettings = false
+    @State private var showBrowser = false
+    @State private var phoneKeyRows = 8              // iPhone: as many rows as keep the pads square
 
     private var track: TrackInfo? {
         store.tracks.indices.contains(store.instrumentTrack) ? store.tracks[store.instrumentTrack] : nil
@@ -28,20 +31,31 @@ struct PlayView: View {
                   kind: layoutKind, octave: octave, columns: 8)
     }
 
-    private var rows: Int { mode == .drums ? (drum64 ? 8 : 4) : (sizeClass == .regular ? 8 : 5) }
+    private var rows: Int {
+        if mode == .drums { return drum64 ? 8 : 4 }
+        if Layout.isPhone { return phoneKeyRows }
+        return sizeClass == .regular ? 8 : 5
+    }
     private var cols: Int { mode == .drums ? (drum64 ? 8 : 4) : 8 }
 
     var body: some View {
         VStack(spacing: 8) {
             InstrumentTrackPicker()
-            toolbar
-            HStack(spacing: 8) {
+            if Layout.isPhone { phoneToolbar } else { toolbar }
+            HStack(spacing: Layout.isPhone ? 6 : 8) {
                 TouchStrip(mode: .pitchBend, color: trackColor) { store.midi.pitchBend($0) }
                 padGrid
+                    .onGeometryChange(for: CGSize.self) { $0.size } action: { size in
+                        guard Layout.isPhone, size.width > 0 else { return }
+                        let cell = (size.width - 7 * 4) / 8
+                        let fit = Int((size.height + 4) / (cell + 4))
+                        let n = min(8, max(3, fit))
+                        if n != phoneKeyRows { releaseAll(); phoneKeyRows = n }
+                    }
                 TouchStrip(mode: .modulation, color: trackColor) { store.midi.controlChange(1, $0) }
             }
         }
-        .padding(8)
+        .padding(Layout.isPhone ? 6 : 8)
         .onAppear {
             if store.instrumentTrack < 0, let first = store.midiTracks.first { store.selectInstrument(first.i) }
             store.midi.refresh()
@@ -52,6 +66,51 @@ struct PlayView: View {
         .onChange(of: store.instrumentTrack) { syncModeToTrack() }
         .onDisappear { releaseAll() }
         .sheet(isPresented: $showMIDIHelp) { MIDISetupSheet() }
+        .sheet(isPresented: $showBrowser) { BrowserView(inSheet: true) }
+        .sheet(isPresented: $showSettings) {
+            PlaySettingsSheet(mode: mode)
+                .presentationDetents([.medium, .large])
+        }
+    }
+
+    /// iPhone: one row — mode, bank/octave, arm, settings, MIDI. The rest lives in the settings sheet.
+    private var phoneToolbar: some View {
+        HStack(spacing: 8) {
+            Picker("Mode", selection: $mode) {
+                ForEach(PlayMode.allCases, id: \.self) { Text($0.rawValue) }
+            }
+            .pickerStyle(.segmented)
+            .frame(width: 128)
+            .onChange(of: mode) { releaseAll() }
+
+            if mode == .drums {
+                stepper(label: Music.name(drumOffset),
+                        down: { drumOffset = max(0, drumOffset - (drum64 ? 4 : 16)) },
+                        up: { drumOffset = min(128 - rows * cols, drumOffset + (drum64 ? 4 : 16)) })
+            } else {
+                stepper(label: "Oct \(octave)", down: { octave = max(-1, octave - 1) }, up: { octave = min(7, octave + 1) })
+            }
+
+            Spacer(minLength: 0)
+
+            if let track, track.canArm {
+                ToggleChip(label: "", systemImage: "record.circle", isOn: track.arm, onColor: Theme.record) {
+                    store.toggleArm(track.i)
+                }
+                .frame(width: 40)
+            }
+            Button { showBrowser = true } label: {
+                Image(systemName: "books.vertical").frame(width: 32, height: 32)
+            }
+            Button { showSettings = true } label: {
+                Image(systemName: "slider.horizontal.3").frame(width: 32, height: 32)
+            }
+            Button { showMIDIHelp = true } label: {
+                Image(systemName: "pianokeys")
+                    .foregroundStyle(store.midi.destinations.isEmpty ? Theme.record : Theme.play)
+                    .frame(width: 32, height: 32)
+            }
+        }
     }
 
     // MARK: Toolbar
@@ -103,6 +162,11 @@ struct PlayView: View {
                 }
                 .frame(width: 44)
             }
+
+            Button { showBrowser = true } label: {
+                Label("Browse", systemImage: "books.vertical")
+            }
+            .font(.caption.weight(.semibold))
 
             Button { showMIDIHelp = true } label: {
                 Image(systemName: "pianokeys")
@@ -291,6 +355,61 @@ struct MIDISetupSheet: View {
             .navigationTitle("MIDI")
             .toolbar { Button("Done") { dismiss() } }
             .onAppear { store.midi.refresh() }
+        }
+    }
+}
+
+/// iPhone Play settings that don't fit in the toolbar.
+struct PlaySettingsSheet: View {
+    @Environment(LiveStore.self) private var store
+    @Environment(\.dismiss) private var dismiss
+    let mode: PlayMode
+
+    @AppStorage("keyInKey") private var inKey = true
+    @AppStorage("keyLayout") private var layoutKind: KeyLayout.Kind = .fourths
+    @AppStorage("drum64") private var drum64 = false
+    @AppStorage("velocity") private var velocity = 100.0
+    @AppStorage("velocityByPosition") private var velocityByPosition = false
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Velocity") {
+                    Toggle("From touch position", isOn: $velocityByPosition)
+                    HStack {
+                        Slider(value: $velocity, in: 1...127)
+                        Text("\(Int(velocity))").monospacedDigit().frame(width: 36)
+                    }
+                    .disabled(velocityByPosition)
+                }
+                if mode == .drums {
+                    Section("Drums") {
+                        Picker("Pads", selection: $drum64) {
+                            Text("16").tag(false)
+                            Text("64").tag(true)
+                        }
+                        .pickerStyle(.segmented)
+                    }
+                } else {
+                    Section("Keys") {
+                        Picker("Root", selection: Binding(get: { store.song.rootNote % 12 },
+                                                          set: { store.setScale(root: $0) })) {
+                            ForEach(0..<12, id: \.self) { Text(Music.noteNames[$0]).tag($0) }
+                        }
+                        Picker("Scale", selection: Binding(get: { store.song.scaleName },
+                                                           set: { store.setScale(name: $0) })) {
+                            ForEach(Music.scales, id: \.name) { Text($0.name).tag($0.name) }
+                        }
+                        Toggle("In Key", isOn: $inKey)
+                        Picker("Layout", selection: $layoutKind) {
+                            ForEach(KeyLayout.Kind.allCases, id: \.self) { Text($0.rawValue).tag($0) }
+                        }
+                    }
+                }
+            }
+            .navigationTitle("Play Settings")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { Button("Done") { dismiss() } }
         }
     }
 }

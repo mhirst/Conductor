@@ -11,6 +11,7 @@
 		13829266D3FDA5B7DF5624EB /* LiveConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DB2FD8AB82177E2C323E6C5 /* LiveConnection.swift */; };
 		15B985EA901CD2AEA2D320B5 /* MIDIOut.swift in Sources */ = {isa = PBXBuildFile; fileRef = F52489F3566DABF3F9D1A54D /* MIDIOut.swift */; };
 		172ADA5C4AF01C2D4457F9BB /* DevicesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 093EAD73ED50C9A854225AE2 /* DevicesView.swift */; };
+		4AA28E23BF92EC5542CC9049 /* BrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E75649BC5D881155454C0D2 /* BrowserView.swift */; };
 		594CAB2BFC3D6CBFCEAE8D1D /* SessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0AC644BE19FA6ED4A6EB9A /* SessionView.swift */; };
 		6AD3325C758A67DC379DA18B /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462B8B6BD3D0CCD5C933082E /* Models.swift */; };
 		6D28422B9C5DAB455E23293A /* LiveStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19001AD5A6CEA955B1C5A8D4 /* LiveStore.swift */; };
@@ -20,6 +21,7 @@
 		B42A7B28C05C48DB1F9D6809 /* ConductorApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE4B998A3E53CBEA854E33CD /* ConductorApp.swift */; };
 		C1B96080EF5A90DE4EA82762 /* PadSurface.swift in Sources */ = {isa = PBXBuildFile; fileRef = E97CA2D016AC5BBF1BB54099 /* PadSurface.swift */; };
 		C5E3D68F71E187D4F11557AD /* Controls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72A215AB41544FC935918DCB /* Controls.swift */; };
+		CCD8156C806C4F0D394585A0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6CF4059610D4F1DF83709373 /* Assets.xcassets */; };
 		D42586E7E6530C5C6A317AC0 /* Music.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC1688250A4CAF6B3D78F006 /* Music.swift */; };
 		DEF614850685553E7E34C096 /* LockViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A599524EBA0AAB1615EF6E36 /* LockViews.swift */; };
 		F62D77FBEF6C1001246F9F43 /* PlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34FB389E84FBEC4552F686E7 /* PlayView.swift */; };
@@ -30,10 +32,12 @@
 		093EAD73ED50C9A854225AE2 /* DevicesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicesView.swift; sourceTree = "<group>"; };
 		19001AD5A6CEA955B1C5A8D4 /* LiveStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStore.swift; sourceTree = "<group>"; };
 		2FD033008CD2225DC1DA57D6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		33E8C10033A716B98F10ECB9 /* Conductor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Conductor.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		33E8C10033A716B98F10ECB9 /* Conductor.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Conductor.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		34FB389E84FBEC4552F686E7 /* PlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayView.swift; sourceTree = "<group>"; };
 		393373EF318FD586C9C211F7 /* SequencerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SequencerView.swift; sourceTree = "<group>"; };
 		462B8B6BD3D0CCD5C933082E /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		4E75649BC5D881155454C0D2 /* BrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserView.swift; sourceTree = "<group>"; };
+		6CF4059610D4F1DF83709373 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		72A215AB41544FC935918DCB /* Controls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Controls.swift; sourceTree = "<group>"; };
 		8DB2FD8AB82177E2C323E6C5 /* LiveConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveConnection.swift; sourceTree = "<group>"; };
 		9DB7D93157EC2C0C0155F10B /* ServiceBrowser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceBrowser.swift; sourceTree = "<group>"; };
@@ -50,6 +54,7 @@
 		0E0287BF63F8202447976F21 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				4E75649BC5D881155454C0D2 /* BrowserView.swift */,
 				72A215AB41544FC935918DCB /* Controls.swift */,
 				093EAD73ED50C9A854225AE2 /* DevicesView.swift */,
 				A599524EBA0AAB1615EF6E36 /* LockViews.swift */,
@@ -74,6 +79,7 @@
 		699CCDFE93348CB6C52C00FD /* Conductor */ = {
 			isa = PBXGroup;
 			children = (
+				6CF4059610D4F1DF83709373 /* Assets.xcassets */,
 				2FD033008CD2225DC1DA57D6 /* Info.plist */,
 				F6B080543A5922DFDB9EBA20 /* App */,
 				BA425EF50CF39842D414586E /* Model */,
@@ -127,6 +133,7 @@
 			buildConfigurationList = 0FC66D382DBDD4D862E86C7C /* Build configuration list for PBXNativeTarget "Conductor" */;
 			buildPhases = (
 				5014C51B3C55F06269359607 /* Sources */,
+				2F981A38394C6CB2E7104CC6 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -146,9 +153,10 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 2650;
+				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					3CB839982A2ACEF6F28983E5 = {
+						DevelopmentTeam = N86L59CTP6;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -172,11 +180,23 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXResourcesBuildPhase section */
+		2F981A38394C6CB2E7104CC6 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CCD8156C806C4F0D394585A0 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		5014C51B3C55F06269359607 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4AA28E23BF92EC5542CC9049 /* BrowserView.swift in Sources */,
 				B42A7B28C05C48DB1F9D6809 /* ConductorApp.swift in Sources */,
 				C5E3D68F71E187D4F11557AD /* Controls.swift in Sources */,
 				172ADA5C4AF01C2D4457F9BB /* DevicesView.swift in Sources */,
@@ -235,10 +255,8 @@
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = N86L59CTP6;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -260,7 +278,6 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -273,6 +290,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = N86L59CTP6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Conductor/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Conductor;
@@ -298,6 +316,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = N86L59CTP6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Conductor/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Conductor;
@@ -353,10 +372,8 @@
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = N86L59CTP6;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -371,7 +388,6 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;

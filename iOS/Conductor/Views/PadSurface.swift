@@ -114,7 +114,7 @@ struct TouchStrip: View {
                     }
             )
         }
-        .frame(width: 44)
+        .frame(width: Layout.isPhone ? 34 : 44)
         .overlay(alignment: .top) {
             Text(mode == .pitchBend ? "PB" : "MOD")
                 .font(.system(size: 9, weight: .bold)).foregroundStyle(.secondary).padding(.top, 6)

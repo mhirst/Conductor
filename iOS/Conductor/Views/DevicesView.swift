@@ -3,35 +3,36 @@ import SwiftUI
 struct DevicesView: View {
     @Environment(LiveStore.self) private var store
     @AppStorage("deviceMode") private var mode: Mode = .knobs
+    @State private var showBrowser = false
 
     enum Mode: String, CaseIterable { case knobs = "Knobs", xy = "XY" }
 
     var body: some View {
-        @Bindable var store = store
         VStack(spacing: 6) {
             TrackPicker()
             DeviceChain()
-            HStack {
-                if let f = store.focused {
-                    Text(f.name).font(.headline).lineLimit(1)
-                    if f.className.contains("PluginDevice") && store.params.count <= 1 {
-                        Text("No parameters exposed — click “Configure” on the plug-in in Live")
-                            .font(.caption).foregroundStyle(.secondary)
+            Group {
+            if Layout.isPhone {
+                // iPhone: device name on its own line, controls under it.
+                VStack(alignment: .leading, spacing: 6) {
+                    deviceTitle
+                    HStack {
+                        followToggle
+                        Button { showBrowser = true } label: { Image(systemName: "books.vertical") }
+                        Spacer()
+                        modePicker
                     }
-                } else {
-                    Text("Pick a device").font(.headline).foregroundStyle(.secondary)
                 }
-                Spacer()
-                Toggle(isOn: $store.followLive) {
-                    Label("Follow Live", systemImage: "hand.point.up.left.fill")
+            } else {
+                HStack {
+                    deviceTitle
+                    Spacer()
+                    followToggle
+                    Button { showBrowser = true } label: { Label("Browse", systemImage: "books.vertical") }
+                        .font(.caption)
+                    modePicker
                 }
-                .toggleStyle(.button)
-                .font(.caption)
-                Picker("Mode", selection: $mode) {
-                    ForEach(Mode.allCases, id: \.self) { Text($0.rawValue) }
-                }
-                .pickerStyle(.segmented)
-                .frame(width: 140)
+            }
             }
             .padding(.horizontal, 6)
 
@@ -44,9 +45,41 @@ struct DevicesView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .padding(6)
+        .sheet(isPresented: $showBrowser) { BrowserView(inSheet: true) }
         .onAppear {
             if store.watchedTrack < 0, let first = store.tracks.first { store.watchTrack(first.i) }
         }
+    }
+
+    @ViewBuilder private var deviceTitle: some View {
+        HStack {
+            if let f = store.focused {
+                Text(f.name).font(.headline).lineLimit(1)
+                if f.className.contains("PluginDevice") && store.params.count <= 1 {
+                    Text("No parameters exposed — click “Configure” on the plug-in in Live")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+            } else {
+                Text("Pick a device").font(.headline).foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    private var followToggle: some View {
+        @Bindable var store = store
+        return Toggle(isOn: $store.followLive) {
+            Label("Follow Live", systemImage: "hand.point.up.left.fill")
+        }
+        .toggleStyle(.button)
+        .font(.caption)
+    }
+
+    private var modePicker: some View {
+        Picker("Mode", selection: $mode) {
+            ForEach(Mode.allCases, id: \.self) { Text($0.rawValue) }
+        }
+        .pickerStyle(.segmented)
+        .frame(width: 140)
     }
 }
 

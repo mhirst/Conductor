@@ -5,6 +5,7 @@ import SwiftUI
 struct SequencerView: View {
     @Environment(LiveStore.self) private var store
     @Environment(\.horizontalSizeClass) private var sizeClass
+    @Environment(\.verticalSizeClass) private var vSize
 
     @AppStorage("seqResolution") private var resolution = 0.25     // beats per step
     @AppStorage("seqNewClipBars") private var newClipBars = 1
@@ -21,7 +22,8 @@ struct SequencerView: View {
 
     struct StepRef: Identifiable { let step: Int; var id: Int { step } }
 
-    private let stepsPerPage = 16
+    /// iPhone portrait shows half a bar per page so steps stay finger-sized.
+    private var stepsPerPage: Int { Layout.isPhone && vSize != .compact ? 8 : 16 }
 
     private var track: TrackInfo? {
         store.tracks.indices.contains(store.instrumentTrack) ? store.tracks[store.instrumentTrack] : nil
@@ -49,7 +51,7 @@ struct SequencerView: View {
         if store.instrumentIsDrum {
             return (drumOffset..<min(128, drumOffset + 16)).map { ($0, Music.name($0)) }.reversed()
         }
-        let count = sizeClass == .regular ? 14 : 10
+        let count = Layout.isPhone ? (vSize == .compact ? 8 : 12) : (sizeClass == .regular ? 14 : 10)
         let layout = KeyLayout(root: store.song.rootNote, intervals: store.song.scaleIntervals, inKey: inKey,
                                kind: .sequential, octave: octave, columns: 8)
         let notes = inKey ? layout.scaleNotes(count: count, from: octave)
@@ -91,7 +93,15 @@ struct SequencerView: View {
 
     // MARK: Controls
 
-    private var controls: some View {
+    @ViewBuilder private var controls: some View {
+        if Layout.isPhone {
+            ScrollView(.horizontal, showsIndicators: false) { controlsRow }
+        } else {
+            controlsRow
+        }
+    }
+
+    private var controlsRow: some View {
         HStack(spacing: 10) {
             clipMenu
 
@@ -219,7 +229,7 @@ struct SequencerView: View {
                                 }
                         }
                     }
-                    .frame(height: sizeClass == .regular ? 38 : 30)
+                    .frame(height: Layout.isPhone ? 34 : (sizeClass == .regular ? 38 : 30))
                 }
             }
         }
@@ -278,7 +288,7 @@ private struct RowLabel: View {
             .font(.system(size: 11, weight: .semibold))
             .lineLimit(1)
             .padding(.horizontal, 6)
-            .frame(width: 92, alignment: .leading)
+            .frame(width: Layout.rowLabelWidth, alignment: .leading)
             .frame(maxHeight: .infinity)
             .foregroundStyle(isRoot ? .black : .white.opacity(0.85))
             .background(RoundedRectangle(cornerRadius: 4).fill(isRoot ? color : Theme.panel))

@@ -29,6 +29,14 @@ final class LiveStore {
     var seq: SeqClip?
     var seqPos: Double = -1
     var lockLane: LockLane?
+
+    // Browser
+    var browserCategories: [BrowserCategory] = []
+    var browserListing: BrowseMsg?
+    var browserLoading = false
+    var browserCanPreview = false
+    var lastLoaded: String?
+    var browserNewTrack: Int?             // set after loading onto a new track
     var lockStepLocks: [Int: Double] = [:]   // param index -> value, for the step being edited
 
     // Devices
@@ -122,6 +130,10 @@ final class LiveStore {
                 hostName = try decoder.decode(HelloMsg.self, from: line).host
             case "state":
                 apply(try decoder.decode(StateMsg.self, from: line))
+                if let t = pendingInstrument, tracks.indices.contains(t) {
+                    pendingInstrument = nil
+                    selectInstrument(t)
+                }
             case "slot":
                 let m = try decoder.decode(SlotMsg.self, from: line)
                 if slots.indices.contains(m.t), slots[m.t].indices.contains(m.s) {
@@ -186,6 +198,19 @@ final class LiveStore {
                 }
                 if let k = editingLockStep, m.values.indices.contains(k), !isTouching("lockstep:\(m.i)") {
                     lockStepLocks[m.i] = m.values[k]
+                }
+            case "browse":
+                let m = try decoder.decode(BrowseMsg.self, from: line)
+                browserCanPreview = m.canPreview
+                if m.cat == nil { browserCategories = m.categories } else { browserListing = m }
+                browserLoading = false
+            case "loaded":
+                let m = try decoder.decode(LoadedMsg.self, from: line)
+                lastLoaded = "Loaded \(m.name) on \(m.track)"
+                // A new track becomes what Play and Steps target, like loading on Push.
+                if m.newTrack, m.t >= 0 {
+                    pendingInstrument = m.t
+                    browserNewTrack = m.t
                 }
             case "lockstep":
                 let m = try decoder.decode(LockStepMsg.self, from: line)
@@ -342,6 +367,23 @@ final class LiveStore {
         send(["cmd": "seq_toggle", "pitch": pitch, "start": start, "duration": step,
               "velocity": velocity, "clipLength": clipLength])
     }
+    // Browser: one folder level per request.
+    @ObservationIgnored private var pendingInstrument: Int?
+
+    func browseCategories() { send(["cmd": "browse"]) }
+    func browse(cat: String, path: [Int]) {
+        browserLoading = true
+        send(["cmd": "browse", "cat": cat, "path": path])
+    }
+    /// target: a track index, or nil for a new MIDI track.
+    func browserLoad(cat: String, path: [Int], toTrack t: Int?) {
+        var m: [String: Any] = ["cmd": "browser_load", "cat": cat, "path": path]
+        if let t { m["t"] = t } else { m["target"] = "new" }
+        send(m)
+    }
+    func browserPreview(cat: String, path: [Int]) { send(["cmd": "browser_preview", "cat": cat, "path": path]) }
+    func browserStopPreview() { send(["cmd": "browser_preview", "stop": true]) }
+
     // P-locks: stored as the sequencer clip's automation. Commands name the device explicitly.
     @ObservationIgnored var editingLockStep: Int?
 

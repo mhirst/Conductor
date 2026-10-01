@@ -1,4 +1,12 @@
 import SwiftUI
+import UIKit
+
+/// Phone-specific layout switches. The iPad layout is the default and stays untouched.
+enum Layout {
+    static let isPhone = UIDevice.current.userInterfaceIdiom == .phone
+    /// Width of the Steps row labels (and the lock lane's label, which must line up with them).
+    static var rowLabelWidth: CGFloat { isPhone ? 72 : 92 }
+}
 
 // Mirrors the JSON emitted by RemoteScript/Conductor/Conductor.py.
 
@@ -153,6 +161,35 @@ struct LockLane: Decodable, Equatable {
     var displays: [String?]
 }
 struct LockStepMsg: Decodable { let k: Int; let locks: [String: Double] }
+
+// MARK: - Browser
+
+struct BrowserCategory: Decodable, Identifiable, Equatable {
+    var key: String
+    var name: String
+    var id: String { key }
+}
+
+struct BrowserItem: Decodable, Equatable {
+    var name: String
+    var isFolder: Bool
+    var isLoadable: Bool
+    var isDevice: Bool
+    /// Devices (e.g. Drift) open to their preset folders; plain presets/samples don't.
+    var isOpenable: Bool { isFolder || isDevice || !isLoadable }
+}
+
+struct BrowseMsg: Decodable, Equatable {
+    var cat: String?
+    var path: [Int]
+    var name: String
+    var items: [BrowserItem]
+    var truncated: Bool
+    var canPreview: Bool
+    var categories: [BrowserCategory]
+}
+
+struct LoadedMsg: Decodable { let name: String; let track: String; let t: Int; let newTrack: Bool }
 
 /// The clip the step sequencer edits. notes: [pitch, start, duration, velocity, mute]
 struct SeqClip: Decodable, Equatable {

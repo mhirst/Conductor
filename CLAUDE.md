@@ -18,7 +18,9 @@ iOS/
     ├── Net/            LiveConnection (NWConnection, NDJSON), ServiceBrowser (Bonjour)
     ├── Model/          Models (wire types), LiveStore (@Observable state + intents)
     └── Views/          RootView/Transport/Connect, SessionView, MixerView, DevicesView, PlayView (drums/keys),
-                        SequencerView (steps), PadSurface (UIKit multi-touch grid + touch strips), Controls
+                        SequencerView (steps), LockViews (p-locks), BrowserView, PadSurface (UIKit multi-touch grid +
+                        touch strips), Controls
+└── Design/make_icon.swift  Renders the app icon (CoreGraphics) into Assets.xcassets/AppIcon.appiconset
 ```
 
 ## Protocol
@@ -39,6 +41,8 @@ Newline-delimited JSON over TCP port 9001, advertised via Bonjour as `_conductor
   - Network.framework formats IPs as `192.168.1.5%en0`; strip the `%iface` before handing them to CoreMIDI.
   - Simulator: its own MIDIServer grabs UDP 5004, so put the Mac's RTP session on another port (e.g. 5008) and set `midiPort` to match (`xcrun simctl spawn booted defaults write com.mhirst.conductor midiPort -int 5008`).
 - **P-locks** (Elektron-style) are the sequencer clip's automation envelopes: `lock_*` commands rewrite a parameter's envelope as constant steps (`insert_step`) — locked steps hold their value, others hold the lane's base — then `re_enable_automation()`. Reading back samples `value_at_time` mid-step; the base is kept in memory and, after a reload, guessed as the most common step value. Lock commands carry the device's `t`/`path` explicitly because the script's focused device is shared by all connected clients.
+- **Browser**: `browse` lists one level of Live's browser (`cat` = category key such as `drums`, `color:N` for collections, `folder:N` for user folders; `path` = child indices), capped at 3,000 items; `browser_load` loads onto track `t` or a new MIDI track (`target:"new"`); `browser_preview` previews/stops. Live 12 supports `preview_item`.
+- **iPhone layout**: gated on `Layout.isPhone` (idiom, not size class — a Pro Max in landscape reports regular width). Phone gets a TabView (Browse opens as a sheet so iOS doesn't add a "More" tab), compact grids, 8-step pages in portrait, and a Play settings sheet. The iPad layout is the untouched default.
 - Script hot reload: send `{"cmd":"dev_reload"}` on port 9001 — the `_Host` wrapper in `__init__.py` re-imports `Conductor.py` without restarting Live.
 - Faders/knobs use relative drags (never jump); XY pad is absolute.
 

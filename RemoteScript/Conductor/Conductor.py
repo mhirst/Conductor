@@ -715,6 +715,93 @@ class Conductor(object):
             clip.loop_end = end
             clip.end_marker = end
 
+    # ── Browser (Push-style) ────────────────────────────────────────────────
+    # Items are addressed by category key + a path of child indices, fetched one level
+    # at a time: the full library is far too big to send at once.
+
+    BROWSER_CATEGORIES = (
+        ('sounds', 'Sounds'), ('drums', 'Drums'), ('instruments', 'Instruments'),
+        ('audio_effects', 'Audio Effects'), ('midi_effects', 'MIDI Effects'),
+        ('max_for_live', 'Max for Live'), ('plugins', 'Plug-ins'), ('clips', 'Clips'),
+        ('samples', 'Samples'), ('packs', 'Packs'), ('user_library', 'User Library'),
+        ('current_project', 'Current Project'),
+    )
+    BROWSER_LIMIT = 3000
+
+    def _browser(self):
+        return Live.Application.get_application().browser
+
+    def _browser_categories(self):
+        b = self._browser()
+        cats = []
+        for i, col in enumerate(getattr(b, 'colors', []) or []):
+            try:
+                if len(col.children):
+                    cats.append({'key': 'color:%d' % i, 'name': col.name})
+            except Exception:
+                pass
+        for key, name in self.BROWSER_CATEGORIES:
+            if getattr(b, key, None) is not None:
+                cats.append({'key': key, 'name': name})
+        for i, f in enumerate(getattr(b, 'user_folders', []) or []):
+            cats.append({'key': 'folder:%d' % i, 'name': f.name})
+        return cats
+
+    def _browser_root(self, cat):
+        b = self._browser()
+        if cat.startswith('color:'):
+            return list(b.colors)[int(cat[6:])]
+        if cat.startswith('folder:'):
+            return list(b.user_folders)[int(cat[7:])]
+        if cat not in dict(self.BROWSER_CATEGORIES):
+            raise ValueError('unknown browser category %r' % cat)
+        return getattr(b, cat)
+
+    def _browser_item(self, cat, path):
+        item = self._browser_root(cat)
+        for i in path:
+            item = list(item.children)[int(i)]
+        return item
+
+    def _browse_msg(self, cat, path):
+        b = self._browser()
+        msg = {'type': 'browse', 'cat': cat, 'path': path, 'name': '', 'items': [], 'truncated': False,
+               'canPreview': hasattr(b, 'preview_item'), 'categories': []}
+        if not cat:
+            msg['categories'] = self._browser_categories()
+            return msg
+        item = self._browser_item(cat, path)
+        msg['name'] = item.name
+        children = list(item.children)
+        msg['truncated'] = len(children) > self.BROWSER_LIMIT
+        for child in children[:self.BROWSER_LIMIT]:
+            msg['items'].append({
+                'name': child.name,
+                'isFolder': bool(child.is_folder),
+                'isLoadable': bool(child.is_loadable),
+                'isDevice': bool(getattr(child, 'is_device', False)),
+            })
+        return msg
+
+    def _browser_load(self, msg):
+        song = self._song()
+        item = self._browser_item(msg['cat'], msg.get('path') or [])
+        if not item.is_loadable:
+            raise ValueError('%s cannot be loaded' % item.name)
+        new_track = msg.get('target') == 'new'
+        if new_track:
+            # Place the new track after the selected one, like Live's own "insert MIDI track".
+            sel = self._index_of_track(song.view.selected_track)
+            index = sel + 1 if 0 <= sel < self._n_tracks else -1
+            song.create_midi_track(index)
+            song.view.selected_track = song.tracks[index if index >= 0 else len(song.tracks) - 1]
+        elif msg.get('t', -1) >= 0:
+            song.view.selected_track = self._tracks[int(msg['t'])]
+        self._browser().load_item(item)
+        track = song.view.selected_track
+        t = next((i for i, tr in enumerate(song.tracks) if tr == track), -1)
+        return {'type': 'loaded', 'name': item.name, 'track': track.name, 't': t, 'newTrack': new_track}
+
     # ── Parameter locks (Elektron-style) ───────────────────────────────────
     # A lock lane is the sequencer clip's automation envelope for one parameter of the
     # focused device, written as constant steps: locked steps hold their value, the rest
@@ -1119,6 +1206,17 @@ class Conductor(object):
             self._send(c, self._lock_command(cmd, msg))
         elif cmd == 'lock_step':
             self._send(c, self._lock_step_msg(self._lock_device(msg), int(msg['k']), float(msg['step'])))
+        elif cmd == 'browse':
+            self._send(c, self._browse_msg(msg.get('cat'), msg.get('path') or []))
+        elif cmd == 'browser_load':
+            self._send(c, self._browser_load(msg))
+        elif cmd == 'browser_preview':
+            b = self._browser()
+            if msg.get('stop'):
+                if hasattr(b, 'stop_preview'):
+                    b.stop_preview()
+            elif hasattr(b, 'preview_item'):
+                b.preview_item(self._browser_item(msg['cat'], msg.get('path') or []))
         elif cmd == 'dev_reload':
             # Picked up by the host wrapper in __init__.py after this tick.
             self.reload_requested = True
