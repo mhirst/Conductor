@@ -18,7 +18,7 @@ struct DevicesView: View {
                     deviceTitle
                     HStack {
                         followToggle
-                        Button { showBrowser = true } label: { Image(systemName: "books.vertical") }
+                        Button { showBrowser = true } label: { Image(systemName: "folder") }
                         Spacer()
                         modePicker
                     }
@@ -28,7 +28,7 @@ struct DevicesView: View {
                     deviceTitle
                     Spacer()
                     followToggle
-                    Button { showBrowser = true } label: { Label("Browse", systemImage: "books.vertical") }
+                    Button { showBrowser = true } label: { Label("Browse", systemImage: "folder") }
                         .font(.caption)
                     modePicker
                 }
@@ -48,7 +48,15 @@ struct DevicesView: View {
         .sheet(isPresented: $showBrowser) { BrowserView(inSheet: true) }
         .onAppear {
             if store.watchedTrack < 0, let first = store.tracks.first { store.watchTrack(first.i) }
+            focusFirstDeviceIfNeeded()
         }
+        // Open the track's first device instead of an empty "Pick a device" screen.
+        .onChange(of: store.devices) { focusFirstDeviceIfNeeded() }
+    }
+
+    private func focusFirstDeviceIfNeeded() {
+        guard store.focused?.t != store.watchedTrack, let first = store.devices.first else { return }
+        store.focusDevice(first)
     }
 
     @ViewBuilder private var deviceTitle: some View {
@@ -155,6 +163,7 @@ private struct DeviceCard: View {
                     Text(device.name).font(.system(size: 12, weight: .semibold)).lineLimit(1)
                 }
             }
+            .frame(maxWidth: Layout.isPhone ? 170 : 240, alignment: .leading)
         }
         .padding(.leading, 2)
         .padding(.trailing, 10)

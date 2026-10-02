@@ -131,7 +131,7 @@ struct SlotKey: Hashable {
 // MARK: - Wire messages
 
 struct Envelope: Decodable { let type: String }
-struct HelloMsg: Decodable { let version: Int; let host: String }
+struct HelloMsg: Decodable { let version: Int; let host: String; let script: Int? }
 struct StateMsg: Decodable { let song: SongState; let tracks: [TrackInfo]; let scenes: [SceneInfo]; let returns: [String] }
 struct SlotMsg: Decodable { let t: Int; let s: Int; let slot: SlotInfo }
 struct TrackMsg: Decodable { let track: TrackInfo }

@@ -20,6 +20,8 @@ import sys
 PORT = 9001
 SERVICE_TYPE = '_conductor._tcp'
 PROTOCOL_VERSION = 1
+# Bump when the app starts relying on new script features; the app asks users to update below its minimum.
+SCRIPT_VERSION = 3
 MAX_WBUF = 8 * 1024 * 1024
 RETRY_TICKS = 50
 
@@ -236,7 +238,7 @@ class Conductor(object):
             c = _Client(sock, addr)
             self._clients.append(c)
             self._log('client connected from %s' % (addr,))
-            self._send(c, {'type': 'hello', 'version': PROTOCOL_VERSION,
+            self._send(c, {'type': 'hello', 'version': PROTOCOL_VERSION, 'script': SCRIPT_VERSION,
                            'host': socket.gethostname().split('.')[0]})
             self._send(c, self._state_msg())
             if self._watch is not None:

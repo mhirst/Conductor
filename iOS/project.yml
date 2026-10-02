@@ -13,6 +13,32 @@ targets:
     type: application
     platform: iOS
     sources: [Conductor]
+    # Ship the Live remote script inside the app so TestFlight users can AirDrop it to their Mac.
+    preBuildScripts:
+      - name: Bundle remote script
+        basedOnDependencyAnalysis: true
+        inputFiles:
+          - $(SRCROOT)/../RemoteScript/Conductor/Conductor.py
+          - $(SRCROOT)/../RemoteScript/Conductor/__init__.py
+        outputFiles:
+          - $(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/ConductorRemoteScript.zip
+        script: |
+          set -e
+          OUT="$BUILT_PRODUCTS_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/ConductorRemoteScript.zip"
+          TMP="$DERIVED_FILE_DIR/remote-script"
+          rm -rf "$TMP" && mkdir -p "$TMP/Conductor" "$(dirname "$OUT")"
+          cp "$SRCROOT/../RemoteScript/Conductor/Conductor.py" "$SRCROOT/../RemoteScript/Conductor/__init__.py" "$TMP/Conductor/"
+          cat > "$TMP/Install Conductor.txt" <<'TXT'
+          1. Move the "Conductor" folder into:
+             ~/Music/Ableton/User Library/Remote Scripts
+             (create the "Remote Scripts" folder if it isn't there)
+          2. Restart Ableton Live.
+          3. In Live: Settings > Link, Tempo & MIDI > Control Surface: Conductor
+             (Input and Output: None).
+          4. Open Conductor on your iPhone or iPad on the same Wi-Fi.
+          TXT
+          rm -f "$OUT"
+          cd "$TMP" && /usr/bin/zip -qr "$OUT" Conductor "Install Conductor.txt"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.mhirst.conductor
@@ -20,6 +46,7 @@ targets:
         CODE_SIGN_STYLE: Automatic
         DEVELOPMENT_TEAM: N86L59CTP6
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ENABLE_USER_SCRIPT_SANDBOXING: NO
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: Conductor
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
@@ -32,4 +59,5 @@ targets:
       path: Conductor/Info.plist
       properties:
         NSBonjourServices: ["_conductor._tcp", "_apple-midi._udp"]
+        ITSAppUsesNonExemptEncryption: false
         UIRequiresFullScreen: true

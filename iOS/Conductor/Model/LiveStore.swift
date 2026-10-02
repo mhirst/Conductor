@@ -8,6 +8,11 @@ final class LiveStore {
     // Connection
     var status: LiveConnection.Status = .idle
     var hostName: String = ""
+    /// The remote script's version on the Mac (nil until connected; 1 for scripts from before versioning).
+    var scriptVersion: Int?
+    static let requiredScriptVersion = 3
+    var scriptOutdated: Bool { (scriptVersion ?? Self.requiredScriptVersion) < Self.requiredScriptVersion }
+    var showSetup = false
     var hasState = false
     var lastError: String?
 
@@ -127,7 +132,9 @@ final class LiveStore {
         do {
             switch env.type {
             case "hello":
-                hostName = try decoder.decode(HelloMsg.self, from: line).host
+                let hello = try decoder.decode(HelloMsg.self, from: line)
+                hostName = hello.host
+                scriptVersion = hello.script ?? 1
             case "state":
                 apply(try decoder.decode(StateMsg.self, from: line))
                 if let t = pendingInstrument, tracks.indices.contains(t) {

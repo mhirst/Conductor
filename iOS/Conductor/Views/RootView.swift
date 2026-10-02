@@ -13,7 +13,7 @@ enum Screen: String, CaseIterable {
         case .devices: "dial.medium.fill"
         case .play: "circle.grid.3x3.fill"
         case .sequencer: "square.grid.4x3.fill"
-        case .browse: "books.vertical.fill"
+        case .browse: "folder.fill"
         }
     }
 
@@ -57,6 +57,19 @@ struct RootView: View {
             }
         }
         .background(Theme.background.ignoresSafeArea())
+        .overlay(alignment: .bottom) {
+            if store.hasState, store.scriptOutdated {
+                Button { store.showSetup = true } label: {
+                    Label("Update the Conductor script on your Mac", systemImage: "exclamationmark.arrow.triangle.2.circlepath")
+                        .font(.caption.weight(.semibold))
+                        .padding(.horizontal, 14).padding(.vertical, 8)
+                        .background(Capsule().fill(Theme.accent))
+                        .foregroundStyle(.black)
+                }
+                .padding(.bottom, Layout.isPhone ? 96 : 20)
+            }
+        }
+        .sheet(isPresented: Binding(get: { store.showSetup }, set: { store.showSetup = $0 })) { SetupView() }
     }
 }
 
@@ -145,6 +158,7 @@ struct TransportBar: View {
                 Button("Undo", systemImage: "arrow.uturn.backward") { store.undo() }.disabled(!store.song.canUndo)
                 Button("Redo", systemImage: "arrow.uturn.forward") { store.redo() }.disabled(!store.song.canRedo)
                 Divider()
+                Button("Mac Setup…", systemImage: "desktopcomputer") { store.showSetup = true }
                 Button("Disconnect from \(store.hostName)", systemImage: "xmark.circle", role: .destructive) {
                     store.disconnect()
                 }
@@ -237,14 +251,18 @@ struct ConnectView: View {
                     }
                 }
 
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Setup").font(.headline)
-                    Text("1. Run `RemoteScript/install.sh` on your Mac.")
-                    Text("2. In Live: Settings › Link, Tempo & MIDI › Control Surface → **Conductor** (Input/Output: None).")
-                    Text("3. Keep this device on the same Wi-Fi network as your Mac.")
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("First time?").font(.headline)
+                    Text("Conductor needs a small script installed in Live on your Mac.")
+                        .font(.callout).foregroundStyle(.secondary)
+                    Button { store.showSetup = true } label: {
+                        Label("Set Up Your Mac", systemImage: "desktopcomputer.and.arrow.down")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity, minHeight: 44)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(Theme.accent)
                 }
-                .font(.callout)
-                .foregroundStyle(.secondary)
             }
             .padding(28)
             .frame(maxWidth: 560, alignment: .leading)

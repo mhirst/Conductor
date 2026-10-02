@@ -56,6 +56,8 @@ struct ChannelStrip: View {
                         }
                     }
                 }
+            } else if !phoneLandscape {
+                Color.clear.frame(height: 41)   // master has no sends: keep its fader level with the rest
             }
 
             VStack(spacing: 1) {
@@ -95,13 +97,15 @@ struct ChannelStrip: View {
         let arm = ToggleChip(label: "", systemImage: "record.circle", isOn: track.arm, onColor: Theme.record) {
             store.toggleArm(track.i)
         }
+        // Missing buttons keep their space so every fader is the same height and levels line up.
+        let blank = Color.clear.frame(height: 30)
         if phoneLandscape {
             // Side by side to save height.
-            if track.kind != .master { HStack(spacing: 3) { activator; solo } }
-            if track.canArm { arm }
+            if track.kind != .master { HStack(spacing: 3) { activator; solo } } else { blank }
+            if track.canArm { arm } else { blank }
         } else {
-            if track.kind != .master { activator; solo }
-            if track.canArm { arm }
+            if track.kind != .master { activator; solo } else { blank; blank }
+            if track.canArm { arm } else { blank }
         }
     }
 

@@ -13,10 +13,12 @@
 		172ADA5C4AF01C2D4457F9BB /* DevicesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 093EAD73ED50C9A854225AE2 /* DevicesView.swift */; };
 		4AA28E23BF92EC5542CC9049 /* BrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E75649BC5D881155454C0D2 /* BrowserView.swift */; };
 		594CAB2BFC3D6CBFCEAE8D1D /* SessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0AC644BE19FA6ED4A6EB9A /* SessionView.swift */; };
+		5B90A1C8964294F3658BC5DF /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CE0C4E186B80DD4580DBA43 /* SetupView.swift */; };
 		6AD3325C758A67DC379DA18B /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462B8B6BD3D0CCD5C933082E /* Models.swift */; };
 		6D28422B9C5DAB455E23293A /* LiveStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19001AD5A6CEA955B1C5A8D4 /* LiveStore.swift */; };
 		72CECE18FA5E1D48B5C513B2 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0036AC678AAAED765E511F30 /* RootView.swift */; };
 		956D0294E87A56E77D2F3E36 /* SequencerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 393373EF318FD586C9C211F7 /* SequencerView.swift */; };
+		A34B4A92196CC0A18891F620 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 4CD9D22E69E4CF6D47877430 /* PrivacyInfo.xcprivacy */; };
 		A7B9972C8BBB570DCB9C138C /* MixerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E95CC5EA9050F1FEC376CF08 /* MixerView.swift */; };
 		B42A7B28C05C48DB1F9D6809 /* ConductorApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE4B998A3E53CBEA854E33CD /* ConductorApp.swift */; };
 		C1B96080EF5A90DE4EA82762 /* PadSurface.swift in Sources */ = {isa = PBXBuildFile; fileRef = E97CA2D016AC5BBF1BB54099 /* PadSurface.swift */; };
@@ -36,7 +38,9 @@
 		34FB389E84FBEC4552F686E7 /* PlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayView.swift; sourceTree = "<group>"; };
 		393373EF318FD586C9C211F7 /* SequencerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SequencerView.swift; sourceTree = "<group>"; };
 		462B8B6BD3D0CCD5C933082E /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		4CD9D22E69E4CF6D47877430 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		4E75649BC5D881155454C0D2 /* BrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserView.swift; sourceTree = "<group>"; };
+		6CE0C4E186B80DD4580DBA43 /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
 		6CF4059610D4F1DF83709373 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		72A215AB41544FC935918DCB /* Controls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Controls.swift; sourceTree = "<group>"; };
 		8DB2FD8AB82177E2C323E6C5 /* LiveConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveConnection.swift; sourceTree = "<group>"; };
@@ -64,6 +68,7 @@
 				0036AC678AAAED765E511F30 /* RootView.swift */,
 				393373EF318FD586C9C211F7 /* SequencerView.swift */,
 				FF0AC644BE19FA6ED4A6EB9A /* SessionView.swift */,
+				6CE0C4E186B80DD4580DBA43 /* SetupView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -81,6 +86,7 @@
 			children = (
 				6CF4059610D4F1DF83709373 /* Assets.xcassets */,
 				2FD033008CD2225DC1DA57D6 /* Info.plist */,
+				4CD9D22E69E4CF6D47877430 /* PrivacyInfo.xcprivacy */,
 				F6B080543A5922DFDB9EBA20 /* App */,
 				BA425EF50CF39842D414586E /* Model */,
 				CBB8E3BE49FDE6E6BA93B769 /* Net */,
@@ -132,6 +138,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 0FC66D382DBDD4D862E86C7C /* Build configuration list for PBXNativeTarget "Conductor" */;
 			buildPhases = (
+				90771E61A22658E9FE0F4843 /* Bundle remote script */,
 				5014C51B3C55F06269359607 /* Sources */,
 				2F981A38394C6CB2E7104CC6 /* Resources */,
 			);
@@ -186,10 +193,35 @@
 			buildActionMask = 2147483647;
 			files = (
 				CCD8156C806C4F0D394585A0 /* Assets.xcassets in Resources */,
+				A34B4A92196CC0A18891F620 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		90771E61A22658E9FE0F4843 /* Bundle remote script */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/../RemoteScript/Conductor/Conductor.py",
+				"$(SRCROOT)/../RemoteScript/Conductor/__init__.py",
+			);
+			name = "Bundle remote script";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/ConductorRemoteScript.zip",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\nOUT=\"$BUILT_PRODUCTS_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/ConductorRemoteScript.zip\"\nTMP=\"$DERIVED_FILE_DIR/remote-script\"\nrm -rf \"$TMP\" && mkdir -p \"$TMP/Conductor\" \"$(dirname \"$OUT\")\"\ncp \"$SRCROOT/../RemoteScript/Conductor/Conductor.py\" \"$SRCROOT/../RemoteScript/Conductor/__init__.py\" \"$TMP/Conductor/\"\ncat > \"$TMP/Install Conductor.txt\" <<'TXT'\n1. Move the \"Conductor\" folder into:\n   ~/Music/Ableton/User Library/Remote Scripts\n   (create the \"Remote Scripts\" folder if it isn't there)\n2. Restart Ableton Live.\n3. In Live: Settings > Link, Tempo & MIDI > Control Surface: Conductor\n   (Input and Output: None).\n4. Open Conductor on your iPhone or iPad on the same Wi-Fi.\nTXT\nrm -f \"$OUT\"\ncd \"$TMP\" && /usr/bin/zip -qr \"$OUT\" Conductor \"Install Conductor.txt\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		5014C51B3C55F06269359607 /* Sources */ = {
@@ -213,6 +245,7 @@
 				956D0294E87A56E77D2F3E36 /* SequencerView.swift in Sources */,
 				038A825D624FD674CFF91A6B /* ServiceBrowser.swift in Sources */,
 				594CAB2BFC3D6CBFCEAE8D1D /* SessionView.swift in Sources */,
+				5B90A1C8964294F3658BC5DF /* SetupView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -291,6 +324,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = N86L59CTP6;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Conductor/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Conductor;
@@ -317,6 +351,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = N86L59CTP6;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Conductor/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Conductor;

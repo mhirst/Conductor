@@ -105,6 +105,11 @@ struct SequencerView: View {
         HStack(spacing: 10) {
             clipMenu
 
+            Toggle(isOn: $showLocks) { Label("Locks", systemImage: "lock") }
+                .toggleStyle(.button)
+                .font(.caption.weight(.semibold))
+                .disabled(store.seq?.hasClip != true)
+
             Menu {
                 ForEach([1, 2, 4, 8], id: \.self) { bars in
                     Button("\(bars) bar\(bars == 1 ? "" : "s")") {
@@ -136,11 +141,6 @@ struct SequencerView: View {
                 .buttonStyle(.plain)
                 ScaleMenus()
             }
-
-            Toggle(isOn: $showLocks) { Label("Locks", systemImage: "lock") }
-                .toggleStyle(.button)
-                .font(.caption.weight(.semibold))
-                .disabled(store.seq?.hasClip != true)
 
             Spacer(minLength: 0)
 
@@ -284,9 +284,12 @@ private struct RowLabel: View {
     let color: Color
 
     var body: some View {
+        // Two lines so long pad names ("Tom 90s Hi", "Tom 90s Lo") stay distinguishable.
         Text(label)
-            .font(.system(size: 11, weight: .semibold))
-            .lineLimit(1)
+            .font(.system(size: Layout.isPhone ? 10 : 11, weight: .semibold))
+            .lineLimit(2)
+            .minimumScaleFactor(0.85)
+            .multilineTextAlignment(.leading)
             .padding(.horizontal, 6)
             .frame(width: Layout.rowLabelWidth, alignment: .leading)
             .frame(maxHeight: .infinity)

@@ -100,7 +100,7 @@ struct PlayView: View {
                 .frame(width: 40)
             }
             Button { showBrowser = true } label: {
-                Image(systemName: "books.vertical").frame(width: 32, height: 32)
+                Image(systemName: "folder").frame(width: 32, height: 32)
             }
             Button { showSettings = true } label: {
                 Image(systemName: "slider.horizontal.3").frame(width: 32, height: 32)
@@ -164,7 +164,7 @@ struct PlayView: View {
             }
 
             Button { showBrowser = true } label: {
-                Label("Browse", systemImage: "books.vertical")
+                Label("Browse", systemImage: "folder")
             }
             .font(.caption.weight(.semibold))
 
@@ -260,10 +260,13 @@ private struct PadCell: View {
         RoundedRectangle(cornerRadius: 8)
             .fill(lit ? Theme.play : color.opacity(dim ? 0.18 : 0.75))
             .overlay(alignment: .bottomLeading) {
+                // Drum Rack pad names run long ("Hihat Open Stick 90s"): wrap rather than truncate.
                 Text(label)
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundStyle(.black.opacity(dim ? 0.0 : 0.75))
-                    .lineLimit(1)
+                    .lineLimit(3)
+                    .minimumScaleFactor(0.85)
+                    .multilineTextAlignment(.leading)
                     .padding(6)
             }
             .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.white.opacity(lit ? 0.9 : 0), lineWidth: 2))
