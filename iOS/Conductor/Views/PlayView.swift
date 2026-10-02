@@ -75,12 +75,20 @@ struct PlayView: View {
 
     /// iPhone: one row — mode, bank/octave, arm, settings, MIDI. The rest lives in the settings sheet.
     private var phoneToolbar: some View {
-        HStack(spacing: 8) {
+        // Sized for the narrowest Pro (402 pt); if it still doesn't fit, drop the arm button first.
+        ViewThatFits(in: .horizontal) {
+            phoneToolbarRow(showArm: true)
+            phoneToolbarRow(showArm: false)
+        }
+    }
+
+    private func phoneToolbarRow(showArm: Bool) -> some View {
+        HStack(spacing: 6) {
             Picker("Mode", selection: $mode) {
                 ForEach(PlayMode.allCases, id: \.self) { Text($0.rawValue) }
             }
             .pickerStyle(.segmented)
-            .frame(width: 128)
+            .frame(width: 112)
             .onChange(of: mode) { releaseAll() }
 
             if mode == .drums {
@@ -93,25 +101,26 @@ struct PlayView: View {
 
             Spacer(minLength: 0)
 
-            if let track, track.canArm {
+            if showArm, let track, track.canArm {
                 ToggleChip(label: "", systemImage: "record.circle", isOn: track.arm, onColor: Theme.record) {
                     store.toggleArm(track.i)
                 }
-                .frame(width: 40)
+                .frame(width: 36)
             }
             Button { showBrowser = true } label: {
-                Image(systemName: "folder").frame(width: 32, height: 32)
+                Image(systemName: "folder").frame(width: 30, height: 32)
             }
             Button { showSettings = true } label: {
-                Image(systemName: "slider.horizontal.3").frame(width: 32, height: 32)
+                Image(systemName: "slider.horizontal.3").frame(width: 30, height: 32)
             }
             Button { showMIDIHelp = true } label: {
                 Image(systemName: "pianokeys")
                     .foregroundStyle(store.midi.destinations.isEmpty ? Theme.record : Theme.play)
-                    .frame(width: 32, height: 32)
+                    .frame(width: 30, height: 32)
             }
         }
     }
+
 
     // MARK: Toolbar
 
@@ -177,9 +186,9 @@ struct PlayView: View {
 
     private func stepper(label: String, down: @escaping () -> Void, up: @escaping () -> Void) -> some View {
         HStack(spacing: 2) {
-            Button(action: { releaseAll(); down() }) { Image(systemName: "chevron.down").frame(width: 30, height: 30) }
-            Text(label).font(.caption.monospacedDigit().weight(.semibold)).frame(minWidth: 44)
-            Button(action: { releaseAll(); up() }) { Image(systemName: "chevron.up").frame(width: 30, height: 30) }
+            Button(action: { releaseAll(); down() }) { Image(systemName: "chevron.down").frame(width: Layout.isPhone ? 26 : 30, height: 30) }
+            Text(label).font(.caption.monospacedDigit().weight(.semibold)).frame(minWidth: Layout.isPhone ? 38 : 44)
+            Button(action: { releaseAll(); up() }) { Image(systemName: "chevron.up").frame(width: Layout.isPhone ? 26 : 30, height: 30) }
         }
         .buttonStyle(.plain)
         .background(RoundedRectangle(cornerRadius: 6).fill(Theme.cell))

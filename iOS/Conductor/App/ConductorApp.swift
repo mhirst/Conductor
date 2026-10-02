@@ -12,6 +12,9 @@ struct ConductorApp: App {
                 .tint(Theme.accent)
                 .persistentSystemOverlays(.hidden)
                 .statusBarHidden()
+                // Control-surface layouts (pads, faders, toolbars) are sized like hardware; let text grow
+                // one step past the default, not enough to push rows off the screen.
+                .dynamicTypeSize(...DynamicTypeSize.xLarge)
                 .onAppear { UIApplication.shared.isIdleTimerDisabled = true }
         }
     }

@@ -28,6 +28,12 @@ cat > build/ExportOptions.plist <<PLIST
 PLIST
 
 echo "▸ $( [ "$DEST" = upload ] && echo uploading to App Store Connect || echo exporting .ipa )"
-xcodebuild -exportArchive -archivePath build/Conductor.xcarchive -exportOptionsPlist build/ExportOptions.plist \
-  -exportPath build/export -allowProvisioningUpdates 2>&1 | grep -vE "^\s*$" | tail -5
-echo "✓ build $BUILD"
+LOG=build/export.log
+if xcodebuild -exportArchive -archivePath build/Conductor.xcarchive -exportOptionsPlist build/ExportOptions.plist \
+     -exportPath build/export -allowProvisioningUpdates >"$LOG" 2>&1; then
+  echo "✓ build $BUILD $( [ "$DEST" = upload ] && echo "uploaded — it appears in App Store Connect › TestFlight after processing" || echo "exported to build/export" )"
+else
+  grep -E "error|rror:" "$LOG" | head -5
+  echo "✗ export failed (full log: iOS/$LOG)"
+  exit 1
+fi
